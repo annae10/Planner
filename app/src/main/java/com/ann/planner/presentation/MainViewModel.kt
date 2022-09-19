@@ -10,7 +10,7 @@ import com.ann.planner.domain.TaskItem
 
 class MainViewModel: ViewModel() {
 
-    private val repository = TaskListRepositoryImpl()
+    private val repository = TaskListRepositoryImpl
 
     private val getTaskListUseCase = GetTaskListUseCase(repository)
     private val deleteTaskItemUseCase = DeleteTaskItemUseCase(repository)

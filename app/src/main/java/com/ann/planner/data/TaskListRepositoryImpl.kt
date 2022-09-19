@@ -5,17 +5,18 @@ import androidx.lifecycle.MutableLiveData
 import com.ann.planner.domain.TaskItem
 import com.ann.planner.domain.TaskListRepository
 import java.lang.RuntimeException
+import kotlin.random.Random
 
-class TaskListRepositoryImpl :TaskListRepository{
+object TaskListRepositoryImpl :TaskListRepository{
 
     private val taskListLD = MutableLiveData<List<TaskItem>>()
-    private val taskList = mutableListOf<TaskItem>()
+    private val taskList = sortedSetOf<TaskItem>({p1, p2 -> p1.id.compareTo(p2.id)})
 
     private var autoIncrementId = 0
 
     init{
-        for(i in 0 until 10){
-            val item = TaskItem("Title $i", true, i)
+        for(i in 0 until 1000){
+            val item = TaskItem("Title $i", Random.nextBoolean(), i)
             addTaskItem(item)
         }
     }
