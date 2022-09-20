@@ -1,17 +1,15 @@
 package com.ann.planner.presentation
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.widget.LinearLayout
-import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.ann.planner.R
+import com.ann.planner.TaskItemActivity
 import com.ann.planner.databinding.ActivityMainBinding
-import com.ann.planner.domain.TaskItem
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class MainActivity : AppCompatActivity() {
 
@@ -26,12 +24,17 @@ class MainActivity : AppCompatActivity() {
 
         //llTaskList = findViewById(R.id.ll_task_list)
         viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
-        viewModel.taskList.observe(this){
+        viewModel.taskList.observe(this) {
             taskListAdapter.submitList(it)
+        }
+        val buttonAddItem = findViewById<FloatingActionButton>(R.id.buttton_add_task_item)
+        buttonAddItem.setOnClickListener {
+            val intent = TaskItemActivity.newIntentAddItem(this)
+            startActivity(intent)
         }
     }
 
-    private fun setupRecyclerView(){
+    private fun setupRecyclerView() {
         val rvTaskList = findViewById<RecyclerView>(R.id.rv_task_list)
         with(rvTaskList) {
             taskListAdapter = TaskListAdapter()
@@ -76,6 +79,8 @@ class MainActivity : AppCompatActivity() {
     private fun setupClickListener() {
         taskListAdapter.onTaskItemClickListener = {
             Log.d("Main Activity", it.toString())
+            val intent = TaskItemActivity.newIntentEditItem(this, it.id)
+            startActivity(intent)
         }
     }
 

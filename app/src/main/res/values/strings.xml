@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Planner</string>
     <string name="add_new_task_item">Add new task item</string>
+    <string name="error_input_title">Error input title</string>
+    <string name="title_hint">Title:</string>
+    <string name="save">Save</string>
 </resources>
