@@ -11,17 +11,12 @@ import android.widget.Button
 import android.widget.EditText
 import androidx.lifecycle.ViewModelProvider
 import com.ann.planner.domain.TaskItem.Companion.UNDEFINED_ID
+import com.ann.planner.presentation.TaskItemFragment
 import com.ann.planner.presentation.TaskItemViewModel
 import com.google.android.material.textfield.TextInputLayout
 import java.lang.RuntimeException
 
 class TaskItemActivity : AppCompatActivity() {
-
-    private lateinit var viewModel: TaskItemViewModel
-
-    private lateinit var tilTitle: TextInputLayout
-    private lateinit var etTitle: EditText
-    private lateinit var buttonSave: Button
 
     private var screenMode = MODE_UNKNOWN
     private var taskItemId = UNDEFINED_ID
@@ -30,62 +25,18 @@ class TaskItemActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_task_item)
         parseIntent()
-        viewModel = ViewModelProvider(this)[TaskItemViewModel::class.java]
-        initViews()
-        addTextChangeListeners()
         launchRightMode()
-        observeViewModel()
-    }
-
-    private fun observeViewModel(){
-        viewModel.errorInputTitle.observe(this){
-            val message = if (it){
-                getString(R.string.error_input_title)
-            } else { null}
-            tilTitle.error = message
-        }
-        viewModel.shouldCloseScreen.observe(this){
-            finish()
-        }
     }
 
     private fun launchRightMode(){
-        when(screenMode){
-            MODE_EDIT -> launchEditMode()
-            MODE_ADD -> launchAddMode()
+        val fragment = when(screenMode){
+            MODE_EDIT -> TaskItemFragment.newInstanceEditItem(taskItemId)
+            MODE_ADD -> TaskItemFragment.newInstanceAddItem()
+            else -> throw RuntimeException("Unknown screen mode $screenMode")
         }
-    }
-
-    private fun addTextChangeListeners(){
-        etTitle.addTextChangedListener(object: TextWatcher{
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int){
-
-            }
-            override fun onTextChanged(s: CharSequence?, start: Int, count: Int, after: Int){
-                viewModel.resetErrorInputName()
-            }
-            override fun afterTextChanged(s: Editable?){
-
-            }
-        })
-    }
-
-    private fun launchEditMode(){
-
-        viewModel.getTaskItem(taskItemId)
-        viewModel.taskItem.observe(this){
-            etTitle.setText(it.title)
-        }
-        buttonSave.setOnClickListener {
-            viewModel.editTaskItem(etTitle.text?.toString())
-        }
-    }
-
-    private fun launchAddMode(){
-
-        buttonSave.setOnClickListener {
-            viewModel.addTaskItem(etTitle.text?.toString())
-        }
+    supportFragmentManager.beginTransaction()
+        .add(R.id.task_item_container, fragment)
+        .commit()
     }
 
     private fun parseIntent(){
@@ -105,12 +56,6 @@ class TaskItemActivity : AppCompatActivity() {
         }
     }
 
-    private fun initViews(){
-        tilTitle = findViewById(R.id.til_title)
-        etTitle = findViewById(R.id.et_title)
-        buttonSave = findViewById(R.id.save_button)
-    }
-
     companion object {
 
         private const val EXTRA_SCREEN_MODE = "extra_mode"
@@ -119,13 +64,14 @@ class TaskItemActivity : AppCompatActivity() {
         private const val MODE_ADD = "mode_add"
         private const val MODE_UNKNOWN = ""
 
+
         fun newIntentAddItem(context: Context): Intent {
             val intent = Intent(context, TaskItemActivity::class.java)
             intent.putExtra(EXTRA_SCREEN_MODE, MODE_ADD)
             return intent
         }
 
-        fun newIntentEditItem(context: Context, taskItemId: Int): Intent{
+        fun newIntentEditItem(context: Context, taskItemId: Int): Intent {
             val intent = Intent(context, TaskItemActivity::class.java)
             intent.putExtra(EXTRA_SCREEN_MODE, MODE_EDIT)
             intent.putExtra(EXTRA_TASK_ITEM_ID, taskItemId)
