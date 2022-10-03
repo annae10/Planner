@@ -2,8 +2,12 @@ package com.ann.planner.presentation
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.databinding.DataBindingUtil
+import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.ListAdapter
 import com.ann.planner.R
+import com.ann.planner.databinding.ItemTaskDisabledBinding
+import com.ann.planner.databinding.ItemTaskEnabledBinding
 import com.ann.planner.domain.TaskItem
 
 class TaskListAdapter: ListAdapter<TaskItem, TaskItemViewHolder>(TaskItemDiffCallback()) {
@@ -20,23 +24,29 @@ class TaskListAdapter: ListAdapter<TaskItem, TaskItemViewHolder>(TaskItemDiffCal
             VIEW_TYPE_ENABLED -> R.layout.item_task_enabled
             else -> throw RuntimeException("Unknown view type: $viewType")
         }
-        val view = LayoutInflater.from(parent.context).inflate(
-            layout, parent, false
-        )
-        return TaskItemViewHolder(view)
+        val binding = DataBindingUtil.inflate<ViewDataBinding>(
+            LayoutInflater.from(parent.context), layout, parent, false )
+        return TaskItemViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: TaskItemViewHolder, position: Int) {
         val taskItem = getItem(position)
-        holder.view.setOnLongClickListener {
+        val binding = holder.binding
+        binding.root.setOnClickListener {
             onTaskItemLongClickListener?.invoke(taskItem)
             true
         }
-        holder.view.setOnClickListener {
+        binding.root.setOnClickListener {
             onTaskItemClickListener?.invoke(taskItem)
         }
-
-            holder.tvTitle.text = taskItem.title
+        when (binding){
+            is ItemTaskDisabledBinding -> {
+                binding.tvTitle.text = taskItem.title
+            }
+            is ItemTaskEnabledBinding -> {
+                binding.tvTitle.text = taskItem.title
+            }
+        }
 
     }
 

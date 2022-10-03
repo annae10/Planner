@@ -3,6 +3,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Java_android/Planner/app/src/main/res/layout-land/activity_main.xml" value="0.1" />
         <entry key="..\:/Java_android/Planner/app/src/main/res/layout/activity_main.xml" value="0.16" />
         <entry key="..\:/Java_android/Planner/app/src/main/res/layout/activity_task_item.xml" value="0.1" />
         <entry key="..\:/Java_android/Planner/app/src/main/res/layout/fragment_task_item.xml" value="0.1" />

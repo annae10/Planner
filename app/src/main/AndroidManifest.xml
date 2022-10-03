@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Planner">
         <activity
-            android:name=".TaskItemActivity"
+            android:name=".presentation.TaskItemActivity"
             android:windowSoftInputMode="adjustResize"
             android:exported="false" />
         <activity

@@ -1,10 +1,10 @@
 package com.ann.planner.presentation
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,21 +13,37 @@ import android.widget.EditText
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.ann.planner.R
-import com.ann.planner.TaskItemActivity
-import com.ann.planner.domain.TaskItem.Companion.UNDEFINED_ID
+import com.ann.planner.domain.TaskItem
 import com.google.android.material.textfield.TextInputLayout
+import java.lang.RuntimeException
 
-class TaskItemFragment(
-    private val screenMode: String = MODE_UNKNOWN,
-    private val taskItemId: Int = UNDEFINED_ID
-): Fragment() {
+class TaskItemFragment: Fragment() {
 
     private lateinit var viewModel: TaskItemViewModel
+    private lateinit var onEditingFinishedListener: OnEditingFinishedListener
 
     private lateinit var tilTitle: TextInputLayout
     private lateinit var etTitle: EditText
     private lateinit var buttonSave: Button
 
+    private var screenMode: String = MODE_UNKNOWN
+    private var taskItemId: Int = TaskItem.UNDEFINED_ID
+
+
+    override fun onAttach(context: Context){
+        super.onAttach(context)
+        if (context is OnEditingFinishedListener){
+            onEditingFinishedListener = context
+        } else {
+            throw RuntimeException("Activity must implement OnEditingFinishedListener")
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d("TaskItemFragment", "onCreate")
+        super.onCreate(savedInstanceState)
+        parseParams()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,7 +56,6 @@ class TaskItemFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        parseParams()
         viewModel = ViewModelProvider(this)[TaskItemViewModel::class.java]
         initViews(view)
         addTextChangeListeners()
@@ -57,7 +72,7 @@ class TaskItemFragment(
             tilTitle.error = message
         }
         viewModel.shouldCloseScreen.observe(viewLifecycleOwner){
-            activity?.onBackPressed()
+            onEditingFinishedListener.onEditingFinished()
         }
     }
 
@@ -74,7 +89,7 @@ class TaskItemFragment(
 
             }
             override fun onTextChanged(s: CharSequence?, start: Int, count: Int, after: Int){
-                viewModel.resetErrorInputName()
+                viewModel.resetErrorInputTitle()
             }
             override fun afterTextChanged(s: Editable?){
 
@@ -101,11 +116,20 @@ class TaskItemFragment(
     }
 
     private fun parseParams(){
-        if (screenMode != MODE_EDIT && screenMode != MODE_ADD){
-            throw RuntimeException("Param screen mode is absent: $screenMode")
+        val args = requireArguments()
+        if (args.containsKey(SCREEN_MODE)){
+            throw RuntimeException("Param screen mode is absent")
         }
-        if(screenMode == MODE_EDIT && taskItemId == UNDEFINED_ID){
-            throw RuntimeException("Param task item id is absent")
+        val mode = args.getString(SCREEN_MODE)
+        if(mode != MODE_EDIT && mode != MODE_ADD){
+            throw RuntimeException("Unknown screen mode $mode")
+        }
+        screenMode = mode
+        if(screenMode == MODE_EDIT){
+            if(!args.containsKey((TASK_ITEM_ID))){
+                throw RuntimeException("Param shop item id is absent")
+            }
+            taskItemId = args.getInt(TASK_ITEM_ID, TaskItem.UNDEFINED_ID)
         }
     }
 
@@ -115,21 +139,49 @@ class TaskItemFragment(
         buttonSave = view.findViewById(R.id.save_button)
     }
 
+    interface OnEditingFinishedListener {
+
+        fun onEditingFinished()
+    }
+
     companion object {
 
-        private const val EXTRA_SCREEN_MODE = "extra_mode"
-        private const val EXTRA_TASK_ITEM_ID = "extra_task_item_id"
+        private const val SCREEN_MODE = "extra_mode"
+        private const val TASK_ITEM_ID = "extra_task_item_id"
         private const val MODE_EDIT = "mode_edit"
         private const val MODE_ADD = "mode_add"
         private const val MODE_UNKNOWN = ""
 
+
         fun newInstanceAddItem(): TaskItemFragment {
-            return TaskItemFragment(MODE_ADD)
+            return TaskItemFragment().apply{
+                arguments = Bundle().apply{
+                    putString(SCREEN_MODE, MODE_ADD)
+                }
+            }
         }
 
         fun newInstanceEditItem( taskItemId: Int): TaskItemFragment{
-            return TaskItemFragment(MODE_EDIT, taskItemId)
+            return TaskItemFragment().apply {
+                arguments = Bundle().apply {
+                    putString(SCREEN_MODE, MODE_EDIT)
+                    putInt(TASK_ITEM_ID, taskItemId)
+                }
+            }
         }
+
+//        fun newInstanceAddItem(): TaskItemFragment{
+//            return TaskItemFragment(MODE_ADD)
+//        }
+
+//        fun NewInstanceEditItem(taskItemId: Int): TaskItemFragment{
+//            return TaskItemFragment(MODE_EDIT, taskItemId)
+//        }
+//
+//        fun newIntentEditItem(context: Context, taskItemId: Int): Intent{
+//            val intent = Intent(context, TaskItemActivity::class.java)
+//            intent.putExtra(EXTRA_SCREEN_MODE, MODE_EDIT)
+//        }
 
     }
 }

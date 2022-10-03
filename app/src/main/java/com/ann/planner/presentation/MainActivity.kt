@@ -1,25 +1,27 @@
 package com.ann.planner.presentation
 
 import android.os.Bundle
-import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.ann.planner.R
-import com.ann.planner.TaskItemActivity
-import com.ann.planner.databinding.ActivityMainBinding
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), TaskItemFragment.OnEditingFinishedListener {
 
     private lateinit var viewModel: MainViewModel
     private lateinit var taskListAdapter: TaskListAdapter
-    private lateinit var binding: ActivityMainBinding
+    private var taskItemContainer: FragmentContainerView? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        taskItemContainer = findViewById(R.id.task_item_container)
         setupRecyclerView()
 
         //llTaskList = findViewById(R.id.ll_task_list)
@@ -29,9 +31,30 @@ class MainActivity : AppCompatActivity() {
         }
         val buttonAddItem = findViewById<FloatingActionButton>(R.id.buttton_add_task_item)
         buttonAddItem.setOnClickListener {
-            val intent = TaskItemActivity.newIntentAddItem(this)
-            startActivity(intent)
+            if (isOnePaneMode()) {
+                val intent = TaskItemActivity.newIntentAddItem(this)
+                startActivity(intent)
+            } else {
+                launchFragment(TaskItemFragment.newInstanceAddItem())
+            }
         }
+    }
+
+    override fun onEditingFinished(){
+        Toast.makeText(this@MainActivity, "Success", Toast.LENGTH_SHORT).show()
+        supportFragmentManager.popBackStack()
+    }
+
+    private fun isOnePaneMode(): Boolean {
+        return taskItemContainer == null
+    }
+
+    private fun launchFragment(fragment: Fragment){
+        supportFragmentManager.popBackStack()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.task_item_container, fragment)
+            .addToBackStack(null)
+            .commit()
     }
 
     private fun setupRecyclerView() {
@@ -78,9 +101,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupClickListener() {
         taskListAdapter.onTaskItemClickListener = {
-            Log.d("Main Activity", it.toString())
-            val intent = TaskItemActivity.newIntentEditItem(this, it.id)
-            startActivity(intent)
+            if (isOnePaneMode()) {
+                val intent = TaskItemActivity.newIntentEditItem(this, it.id)
+                startActivity(intent)
+            } else {
+                launchFragment(TaskItemFragment.newInstanceEditItem(it.id))
+            }
         }
     }
 
