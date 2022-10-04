@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+    <layout>
+    <data>
+        <variable
+            name="viewModel"
+            type="com.ann.planner.presentation.TaskItemViewModel"
+            />
+    </data>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -22,7 +29,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/title_hint"
-            android:inputType="textCapWords"/>
+            android:inputType="textCapWords"
+            android.text="@{viewModel.taskItem.title}"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -36,3 +44,4 @@
         app:layout_constraintStart_toStartOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

@@ -4,17 +4,13 @@ import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.ann.planner.R
+import com.ann.planner.databinding.FragmentTaskItemBinding
 import com.ann.planner.domain.TaskItem
-import com.google.android.material.textfield.TextInputLayout
 import java.lang.RuntimeException
 
 class TaskItemFragment: Fragment() {
@@ -22,9 +18,9 @@ class TaskItemFragment: Fragment() {
     private lateinit var viewModel: TaskItemViewModel
     private lateinit var onEditingFinishedListener: OnEditingFinishedListener
 
-    private lateinit var tilTitle: TextInputLayout
-    private lateinit var etTitle: EditText
-    private lateinit var buttonSave: Button
+    private var _binding: FragmentTaskItemBinding? = null
+    private val binding: FragmentTaskItemBinding
+    get() = _binding ?: throw RuntimeException("FragmentTaskItemBinding == null")
 
     private var screenMode: String = MODE_UNKNOWN
     private var taskItemId: Int = TaskItem.UNDEFINED_ID
@@ -40,7 +36,6 @@ class TaskItemFragment: Fragment() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.d("TaskItemFragment", "onCreate")
         super.onCreate(savedInstanceState)
         parseParams()
     }
@@ -50,14 +45,16 @@ class TaskItemFragment: Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_task_item, container, false)
+        _binding = FragmentTaskItemBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(this)[TaskItemViewModel::class.java]
-        initViews(view)
+        binding.viewModel = viewModel
+        binding.lifecycleOwner = viewLifecycleOwner
         addTextChangeListeners()
         launchRightMode()
         observeViewModel()
@@ -65,12 +62,6 @@ class TaskItemFragment: Fragment() {
 
 
     private fun observeViewModel(){
-        viewModel.errorInputTitle.observe(viewLifecycleOwner){
-            val message = if (it){
-                getString(R.string.error_input_title)
-            } else { null}
-            tilTitle.error = message
-        }
         viewModel.shouldCloseScreen.observe(viewLifecycleOwner){
             onEditingFinishedListener.onEditingFinished()
         }
@@ -84,7 +75,7 @@ class TaskItemFragment: Fragment() {
     }
 
     private fun addTextChangeListeners(){
-        etTitle.addTextChangedListener(object: TextWatcher {
+        binding.etTitle.addTextChangedListener(object: TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int){
 
             }
@@ -100,24 +91,24 @@ class TaskItemFragment: Fragment() {
     private fun launchEditMode(){
 
         viewModel.getTaskItem(taskItemId)
-        viewModel.taskItem.observe(viewLifecycleOwner){
-            etTitle.setText(it.title)
-        }
-        buttonSave.setOnClickListener {
-            viewModel.editTaskItem(etTitle.text?.toString())
+        binding.saveButton.setOnClickListener{
+            viewModel.editTaskItem(
+                binding.etTitle.text?.toString())
         }
     }
 
     private fun launchAddMode(){
 
-        buttonSave.setOnClickListener {
-            viewModel.addTaskItem(etTitle.text?.toString())
+        binding.saveButton.setOnClickListener {
+            viewModel.addTaskItem(
+                binding.etTitle.text?.toString()
+            )
         }
     }
 
     private fun parseParams(){
         val args = requireArguments()
-        if (args.containsKey(SCREEN_MODE)){
+        if (!args.containsKey(SCREEN_MODE)){
             throw RuntimeException("Param screen mode is absent")
         }
         val mode = args.getString(SCREEN_MODE)
@@ -133,11 +124,6 @@ class TaskItemFragment: Fragment() {
         }
     }
 
-    private fun initViews(view: View){
-        tilTitle = view.findViewById(R.id.til_title)
-        etTitle = view.findViewById(R.id.et_title)
-        buttonSave = view.findViewById(R.id.save_button)
-    }
 
     interface OnEditingFinishedListener {
 
@@ -169,19 +155,6 @@ class TaskItemFragment: Fragment() {
                 }
             }
         }
-
-//        fun newInstanceAddItem(): TaskItemFragment{
-//            return TaskItemFragment(MODE_ADD)
-//        }
-
-//        fun NewInstanceEditItem(taskItemId: Int): TaskItemFragment{
-//            return TaskItemFragment(MODE_EDIT, taskItemId)
-//        }
-//
-//        fun newIntentEditItem(context: Context, taskItemId: Int): Intent{
-//            val intent = Intent(context, TaskItemActivity::class.java)
-//            intent.putExtra(EXTRA_SCREEN_MODE, MODE_EDIT)
-//        }
 
     }
 }

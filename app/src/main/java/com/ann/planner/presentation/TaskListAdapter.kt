@@ -41,13 +41,12 @@ class TaskListAdapter: ListAdapter<TaskItem, TaskItemViewHolder>(TaskItemDiffCal
         }
         when (binding){
             is ItemTaskDisabledBinding -> {
-                binding.tvTitle.text = taskItem.title
+                binding.taskItem = taskItem
             }
             is ItemTaskEnabledBinding -> {
-                binding.tvTitle.text = taskItem.title
+                binding.taskItem = taskItem
             }
         }
-
     }
 
     override fun getItemViewType(position: Int): Int {

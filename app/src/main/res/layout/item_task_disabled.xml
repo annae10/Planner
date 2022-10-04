@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<layout>
+    <data>
+        <variable
+            name="taskItem"
+            type="com.ann.planner.domain.TaskItem"
+            />
+    </data>
 <androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -29,8 +36,9 @@
             android:textColor="@color/white"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:text="Sherlock Holms"/>
+            android:text="@{taskItem.title}"/>
 
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>
+</layout>

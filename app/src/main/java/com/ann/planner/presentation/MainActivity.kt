@@ -9,28 +9,28 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.ann.planner.R
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.ann.planner.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity(), TaskItemFragment.OnEditingFinishedListener {
 
     private lateinit var viewModel: MainViewModel
     private lateinit var taskListAdapter: TaskListAdapter
     private var taskItemContainer: FragmentContainerView? = null
-
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         taskItemContainer = findViewById(R.id.task_item_container)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         setupRecyclerView()
 
-        //llTaskList = findViewById(R.id.ll_task_list)
         viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
         viewModel.taskList.observe(this) {
             taskListAdapter.submitList(it)
         }
-        val buttonAddItem = findViewById<FloatingActionButton>(R.id.buttton_add_task_item)
-        buttonAddItem.setOnClickListener {
+        binding.butttonAddTaskItem.setOnClickListener {
             if (isOnePaneMode()) {
                 val intent = TaskItemActivity.newIntentAddItem(this)
                 startActivity(intent)
@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity(), TaskItemFragment.OnEditingFinishedList
     }
 
     private fun isOnePaneMode(): Boolean {
-        return taskItemContainer == null
+        return binding.taskItemContainer == null
     }
 
     private fun launchFragment(fragment: Fragment){
@@ -58,8 +58,7 @@ class MainActivity : AppCompatActivity(), TaskItemFragment.OnEditingFinishedList
     }
 
     private fun setupRecyclerView() {
-        val rvTaskList = findViewById<RecyclerView>(R.id.rv_task_list)
-        with(rvTaskList) {
+        with(binding.rvTaskList) {
             taskListAdapter = TaskListAdapter()
             adapter = taskListAdapter
             recycledViewPool.setMaxRecycledViews(
@@ -73,7 +72,7 @@ class MainActivity : AppCompatActivity(), TaskItemFragment.OnEditingFinishedList
         }
         setupLongClickListener()
         setupClickListener()
-        setupSwipeListener(rvTaskList)
+        setupSwipeListener(binding.rvTaskList)
     }
 
     private fun setupSwipeListener(rvTaskList: RecyclerView) {
