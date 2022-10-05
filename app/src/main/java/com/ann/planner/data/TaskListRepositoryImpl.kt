@@ -1,56 +1,36 @@
 package com.ann.planner.data
 
+import android.app.Application
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import com.ann.planner.domain.TaskItem
 import com.ann.planner.domain.TaskListRepository
-import java.lang.RuntimeException
-import kotlin.random.Random
 
-object TaskListRepositoryImpl :TaskListRepository{
+class TaskListRepositoryImpl(application: Application) :TaskListRepository{
 
-    private val taskListLD = MutableLiveData<List<TaskItem>>()
-    private val taskList = sortedSetOf<TaskItem>({p1, p2 -> p1.id.compareTo(p2.id)})
-
-    private var autoIncrementId = 0
-
-    init{
-        for(i in 0 until 100){
-            val item = TaskItem("Title $i", Random.nextBoolean(), i)
-            addTaskItem(item)
-        }
-    }
+    private val taskListDao = AppDatabase.getInstance(application).taskListDao()
+    private val mapper = TaskListMapper()
 
     override fun addTaskItem(taskItem: TaskItem) {
-        if(taskItem.id == TaskItem.UNDEFINED_ID){
-            taskItem.id = autoIncrementId++
-        }
-        taskList.add(taskItem)
-        updateList()
+        taskListDao.addTaskItem(mapper.mapEntityToDbModel(taskItem))
     }
 
     override fun deleteTaskItem(taskItem: TaskItem) {
-        taskList.remove(taskItem)
-        updateList()
+        taskListDao.deleteTaskItem(taskItem.id)
     }
 
     override fun editTaskItem(taskItem: TaskItem) {
-        val oldElement = getTaskItem(taskItem.id)
-        taskList.remove(oldElement)
-        addTaskItem(taskItem)
+        taskListDao.addTaskItem(mapper.mapEntityToDbModel(taskItem))
     }
 
     override fun getTaskItem(taskItemId: Int): TaskItem {
-        return taskList.find{
-            it.id == taskItemId
-        }?: throw RuntimeException("Element with id $taskItemId not found")
+        val dbModel = taskListDao.getTaskItem(taskItemId)
+        return mapper.mapDbModelToEntity(dbModel)
     }
 
-    override fun getTaskList(): LiveData<List<TaskItem>> {
-        return taskListLD
-    }
-
-    private fun updateList(){
-        taskListLD.value = taskList.toList()
+    override fun getTaskList(): LiveData<List<TaskItem>> = Transformations.map(
+        taskListDao.getTaskList()
+    ){
+        mapper.mapListDbModelToListEntity(it)
     }
 }

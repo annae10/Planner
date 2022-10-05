@@ -1,0 +1,23 @@
+package com.ann.planner.data
+
+import androidx.lifecycle.LiveData
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+
+@Dao
+interface TaskListDao {
+
+    @Query("SELECT * FROM task_items")
+    fun getTaskList() : LiveData<List<TaskItemDbModel>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun addTaskItem(taskItemDbModel: TaskItemDbModel)
+
+    @Query("DELETE FROM task_items WHERE id=:taskItemId")
+    fun deleteTaskItem(taskItemId: Int)
+
+    @Query("SELECT * FROM task_items WHERE id=:taskItemId LIMIT 1")
+    fun getTaskItem(taskItemId: Int): TaskItemDbModel
+}

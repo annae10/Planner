@@ -1,17 +1,18 @@
 package com.ann.planner.presentation
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import com.ann.planner.data.TaskListRepositoryImpl
 import com.ann.planner.domain.AddTaskItemUseCase
 import com.ann.planner.domain.EditTaskItemUseCase
 import com.ann.planner.domain.GetTaskItemUseCase
 import com.ann.planner.domain.TaskItem
 
-class TaskItemViewModel: ViewModel() {
+class TaskItemViewModel(application: Application): AndroidViewModel(application) {
 
-    private val repository = TaskListRepositoryImpl
+    private val repository = TaskListRepositoryImpl(application)
 
     private val getTaskListUseCase = GetTaskItemUseCase(repository)
     private val addTaskItemUseCase = AddTaskItemUseCase(repository)

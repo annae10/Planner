@@ -1,15 +1,16 @@
 package com.ann.planner.presentation
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import com.ann.planner.data.TaskListRepositoryImpl
 import com.ann.planner.domain.DeleteTaskItemUseCase
 import com.ann.planner.domain.EditTaskItemUseCase
 import com.ann.planner.domain.GetTaskListUseCase
 import com.ann.planner.domain.TaskItem
 
-class MainViewModel: ViewModel() {
+class MainViewModel(application: Application): AndroidViewModel(application) {
 
-    private val repository = TaskListRepositoryImpl
+    private val repository = TaskListRepositoryImpl(application)
 
     private val getTaskListUseCase = GetTaskListUseCase(repository)
     private val deleteTaskItemUseCase = DeleteTaskItemUseCase(repository)

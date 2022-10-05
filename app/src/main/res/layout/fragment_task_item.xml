@@ -30,7 +30,7 @@
             android:layout_height="wrap_content"
             android:hint="@string/title_hint"
             android:inputType="textCapWords"
-            android.text="@{viewModel.taskItem.title}"/>
+            text="@{viewModel.taskItem.title}"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 
