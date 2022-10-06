@@ -4,10 +4,10 @@ import androidx.lifecycle.LiveData
 
 interface TaskListRepository {
 
-    fun addTaskItem(taskItem: TaskItem)
-    fun deleteTaskItem(taskItem: TaskItem)
-    fun editTaskItem(taskItem: TaskItem)
-    fun getTaskItem(taskItemId: Int): TaskItem
+    suspend fun addTaskItem(taskItem: TaskItem)
+    suspend fun deleteTaskItem(taskItem: TaskItem)
+    suspend fun editTaskItem(taskItem: TaskItem)
+    suspend fun getTaskItem(taskItemId: Int): TaskItem
     fun getTaskList(): LiveData<List<TaskItem>>
 
 }

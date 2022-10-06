@@ -4,11 +4,13 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import com.ann.planner.data.TaskListRepositoryImpl
 import com.ann.planner.domain.AddTaskItemUseCase
 import com.ann.planner.domain.EditTaskItemUseCase
 import com.ann.planner.domain.GetTaskItemUseCase
 import com.ann.planner.domain.TaskItem
+import kotlinx.coroutines.launch
 
 class TaskItemViewModel(application: Application): AndroidViewModel(application) {
 
@@ -31,17 +33,21 @@ class TaskItemViewModel(application: Application): AndroidViewModel(application)
     get() = _shouldCloseScreen
 
     fun getTaskItem(taskItemId: Int){
-        val item = getTaskListUseCase.getTaskItem(taskItemId)
-        _taskItem.value = item
+        viewModelScope.launch {
+            val item = getTaskListUseCase.getTaskItem(taskItemId)
+            _taskItem.value = item
+        }
     }
 
     fun addTaskItem(inputTitle: String?){
         val title = parseTitle(inputTitle)
         val fieldsValid = validateInput(title)
         if(fieldsValid){
-            val taskItem = TaskItem(title, true)
-            addTaskItemUseCase.addTaskItem(taskItem)
-            finishWork()
+            viewModelScope.launch {
+                val taskItem = TaskItem(title, true)
+                addTaskItemUseCase.addTaskItem(taskItem)
+                finishWork()
+            }
         }
     }
 
@@ -50,9 +56,11 @@ class TaskItemViewModel(application: Application): AndroidViewModel(application)
         val fieldsValid = validateInput(title)
         if(fieldsValid){
             _taskItem.value?.let {
-                val item = it.copy(title = title)
-                editTaskItemUseCase.editTaskItem(item)
-                finishWork()
+                viewModelScope.launch {
+                    val item = it.copy(title = title)
+                    editTaskItemUseCase.editTaskItem(item)
+                    finishWork()
+                }
             }
         }
     }
@@ -77,4 +85,5 @@ class TaskItemViewModel(application: Application): AndroidViewModel(application)
     private fun finishWork(){
         _shouldCloseScreen.value = Unit
     }
+
 }

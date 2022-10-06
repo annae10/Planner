@@ -13,11 +13,11 @@ interface TaskListDao {
     fun getTaskList() : LiveData<List<TaskItemDbModel>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun addTaskItem(taskItemDbModel: TaskItemDbModel)
+    suspend fun addTaskItem(taskItemDbModel: TaskItemDbModel)
 
     @Query("DELETE FROM task_items WHERE id=:taskItemId")
-    fun deleteTaskItem(taskItemId: Int)
+    suspend fun deleteTaskItem(taskItemId: Int)
 
     @Query("SELECT * FROM task_items WHERE id=:taskItemId LIMIT 1")
-    fun getTaskItem(taskItemId: Int): TaskItemDbModel
+    suspend fun getTaskItem(taskItemId: Int): TaskItemDbModel
 }

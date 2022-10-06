@@ -2,11 +2,13 @@ package com.ann.planner.presentation
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.ann.planner.data.TaskListRepositoryImpl
 import com.ann.planner.domain.DeleteTaskItemUseCase
 import com.ann.planner.domain.EditTaskItemUseCase
 import com.ann.planner.domain.GetTaskListUseCase
 import com.ann.planner.domain.TaskItem
+import kotlinx.coroutines.launch
 
 class MainViewModel(application: Application): AndroidViewModel(application) {
 
@@ -20,11 +22,15 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
 
 
     fun deleteTaskItem(taskItem: TaskItem){
-        deleteTaskItemUseCase.deleteTaskItem(taskItem)
+        viewModelScope.launch {
+            deleteTaskItemUseCase.deleteTaskItem(taskItem)
+        }
     }
 
     fun changeEnableState(taskItem: TaskItem){
-        val newItem = taskItem.copy(enabled = !taskItem.enabled )
-        editTaskItemUseCase.editTaskItem(newItem)
+        viewModelScope.launch {
+            val newItem = taskItem.copy(enabled = !taskItem.enabled )
+            editTaskItemUseCase.editTaskItem(newItem)
+        }
     }
 }
