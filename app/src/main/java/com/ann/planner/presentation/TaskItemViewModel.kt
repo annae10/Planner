@@ -1,24 +1,21 @@
 package com.ann.planner.presentation
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.ann.planner.data.TaskListRepositoryImpl
 import com.ann.planner.domain.AddTaskItemUseCase
 import com.ann.planner.domain.EditTaskItemUseCase
 import com.ann.planner.domain.GetTaskItemUseCase
 import com.ann.planner.domain.TaskItem
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class TaskItemViewModel(application: Application): AndroidViewModel(application) {
+class TaskItemViewModel @Inject constructor(
+    private val getTaskListUseCase:GetTaskItemUseCase,
+    private val addTaskItemUseCase:AddTaskItemUseCase,
+    private val editTaskItemUseCase:EditTaskItemUseCase
 
-    private val repository = TaskListRepositoryImpl(application)
-
-    private val getTaskListUseCase = GetTaskItemUseCase(repository)
-    private val addTaskItemUseCase = AddTaskItemUseCase(repository)
-    private val editTaskItemUseCase = EditTaskItemUseCase(repository)
+): ViewModel() {
 
     private val _errorInputTitle = MutableLiveData<Boolean>()
     val errorInputTitle: LiveData<Boolean>

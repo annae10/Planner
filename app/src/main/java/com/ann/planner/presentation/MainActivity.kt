@@ -6,10 +6,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.ViewModelFactoryDsl
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.ann.planner.R
 import com.ann.planner.databinding.ActivityMainBinding
+import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), TaskItemFragment.OnEditingFinishedListener {
 
@@ -18,7 +20,17 @@ class MainActivity : AppCompatActivity(), TaskItemFragment.OnEditingFinishedList
     private var taskItemContainer: FragmentContainerView? = null
     private lateinit var binding: ActivityMainBinding
 
+    @Inject
+    lateinit var  viewModelFactory: ViewModelFactory
+
+    private val component by lazy {
+        (application as TaskApplication).component
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        component.inject(this)
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         taskItemContainer = findViewById(R.id.task_item_container)
@@ -26,7 +38,7 @@ class MainActivity : AppCompatActivity(), TaskItemFragment.OnEditingFinishedList
         setContentView(binding.root)
         setupRecyclerView()
 
-        viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
+        viewModel = ViewModelProvider(this, viewModelFactory).get(MainViewModel::class.java)
         viewModel.taskList.observe(this) {
             taskListAdapter.submitList(it)
         }

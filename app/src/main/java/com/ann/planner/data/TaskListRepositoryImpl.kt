@@ -1,15 +1,15 @@
 package com.ann.planner.data
 
-import android.app.Application
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
 import com.ann.planner.domain.TaskItem
 import com.ann.planner.domain.TaskListRepository
+import javax.inject.Inject
 
-class TaskListRepositoryImpl(application: Application) :TaskListRepository{
-
-    private val taskListDao = AppDatabase.getInstance(application).taskListDao()
-    private val mapper = TaskListMapper()
+class TaskListRepositoryImpl @Inject constructor(
+    private val taskListDao: TaskListDao,
+    private val mapper: TaskListMapper
+) :TaskListRepository{
 
     override suspend fun addTaskItem(taskItem: TaskItem) {
         taskListDao.addTaskItem(mapper.mapEntityToDbModel(taskItem))

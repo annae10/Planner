@@ -8,10 +8,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.ann.planner.databinding.FragmentTaskItemBinding
 import com.ann.planner.domain.TaskItem
 import java.lang.RuntimeException
+import javax.inject.Inject
 
 class TaskItemFragment: Fragment() {
 
@@ -25,8 +27,17 @@ class TaskItemFragment: Fragment() {
     private var screenMode: String = MODE_UNKNOWN
     private var taskItemId: Int = TaskItem.UNDEFINED_ID
 
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
+
+    private val component by lazy{
+        (requireActivity().application as TaskApplication).component
+    }
 
     override fun onAttach(context: Context){
+
+        component.inject(this)
+
         super.onAttach(context)
         if (context is OnEditingFinishedListener){
             onEditingFinishedListener = context
@@ -52,7 +63,7 @@ class TaskItemFragment: Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(this)[TaskItemViewModel::class.java]
+        viewModel = ViewModelProvider(this, viewModelFactory)[TaskItemViewModel::class.java]
         binding.viewModel = viewModel
         binding.lifecycleOwner = viewLifecycleOwner
         addTextChangeListeners()

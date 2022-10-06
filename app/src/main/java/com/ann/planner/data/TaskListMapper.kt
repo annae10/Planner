@@ -1,8 +1,9 @@
 package com.ann.planner.data
 
 import com.ann.planner.domain.TaskItem
+import javax.inject.Inject
 
-class TaskListMapper {
+class TaskListMapper @Inject constructor(){
 
     fun mapEntityToDbModel(taskItem: TaskItem) = TaskItemDbModel(
         id = taskItem.id,

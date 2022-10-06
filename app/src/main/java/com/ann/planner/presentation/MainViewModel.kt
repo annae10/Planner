@@ -1,22 +1,19 @@
 package com.ann.planner.presentation
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ann.planner.data.TaskListRepositoryImpl
 import com.ann.planner.domain.DeleteTaskItemUseCase
 import com.ann.planner.domain.EditTaskItemUseCase
 import com.ann.planner.domain.GetTaskListUseCase
 import com.ann.planner.domain.TaskItem
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MainViewModel(application: Application): AndroidViewModel(application) {
-
-    private val repository = TaskListRepositoryImpl(application)
-
-    private val getTaskListUseCase = GetTaskListUseCase(repository)
-    private val deleteTaskItemUseCase = DeleteTaskItemUseCase(repository)
-    private val editTaskItemUseCase = EditTaskItemUseCase(repository)
+class MainViewModel @Inject constructor(
+        private val getTaskListUseCase: GetTaskListUseCase,
+        private val deleteTaskItemUseCase: DeleteTaskItemUseCase,
+        private val editTaskItemUseCase: EditTaskItemUseCase
+): ViewModel() {
 
     val taskList = getTaskListUseCase.getTaskList()
 
