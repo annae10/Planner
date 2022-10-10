@@ -1,6 +1,8 @@
 package com.ann.planner.presentation
 
+import android.content.ContentValues
 import android.content.Context
+import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -14,6 +16,7 @@ import com.ann.planner.databinding.FragmentTaskItemBinding
 import com.ann.planner.domain.TaskItem
 import java.lang.RuntimeException
 import javax.inject.Inject
+import kotlin.concurrent.thread
 
 class TaskItemFragment: Fragment() {
 
@@ -111,9 +114,17 @@ class TaskItemFragment: Fragment() {
     private fun launchAddMode(){
 
         binding.saveButton.setOnClickListener {
-            viewModel.addTaskItem(
-                binding.etTitle.text?.toString()
-            )
+
+            thread{
+                context?.contentResolver?.insert(
+                    Uri.parse("content://com.ann.planner/task_items"),
+                    ContentValues().apply {
+                        put("id", 0)
+                        put("title", binding.etTitle.text?.toString())
+                        put("enabled", true)
+                    }
+                )
+            }
         }
     }
 

@@ -1,17 +1,20 @@
 package com.ann.planner.presentation
 
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.ViewModelFactoryDsl
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.ann.planner.R
 import com.ann.planner.databinding.ActivityMainBinding
+import com.ann.planner.domain.TaskItem
 import javax.inject.Inject
+import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity(), TaskItemFragment.OnEditingFinishedListener {
 
@@ -49,6 +52,25 @@ class MainActivity : AppCompatActivity(), TaskItemFragment.OnEditingFinishedList
             } else {
                 launchFragment(TaskItemFragment.newInstanceAddItem())
             }
+        }
+
+        thread {
+            val cursor = contentResolver.query(
+            Uri.parse("content://com.ann.planner/task_lists"),
+            null, null, null, null, null
+        )
+            while (cursor?.moveToNext() == true){
+                val id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
+                val title = cursor.getString(cursor.getColumnIndexOrThrow("title"))
+                val enabled = cursor.getInt(cursor.getColumnIndexOrThrow("enabled")) > 0
+                val taskItem = TaskItem(
+                    id = id,
+                    title = title,
+                    enabled = enabled
+                )
+                Log.d("MainActivity", taskItem.toString())
+            }
+            cursor?.close()
         }
     }
 
@@ -103,7 +125,14 @@ class MainActivity : AppCompatActivity(), TaskItemFragment.OnEditingFinishedList
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val item = taskListAdapter.currentList[viewHolder.adapterPosition]
-                viewModel.deleteTaskItem(item)
+//                viewModel.deleteTaskItem(item)
+                thread {
+                    contentResolver.delete(
+                        Uri.parse("content://com.ann.planner/task_items"),
+                        null,
+                        arrayOf(item.id.toString())
+                    )
+                }
             }
         }
         val itemTouchHelper = ItemTouchHelper(callback)
